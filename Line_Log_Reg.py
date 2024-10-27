@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
+import seaborn as sns
+import matplotlib.pyplot as plt 
 import streamlit as st
 from sklearn.linear_model import LogisticRegression as SklearnLogReg
 from sklearn.metrics import accuracy_score
@@ -58,6 +60,7 @@ learning_rate = st.number_input(
 
 # Линейная регрессия
 if regression_type == "Линейная регрессия":
+
     class LinReg:
         def __init__(self, learning_rate, epochs, feature_names):
             self.learning_rate = learning_rate
@@ -99,8 +102,10 @@ if regression_type == "Линейная регрессия":
         def derivative_w2(self, X, y):
             return -2 * X[:, 1] * (y - self.predict(X))
 
-    # Обучаем вашу модель
-    model = LinReg(learning_rate, epochs, X_train.columns.tolist())
+# После того, как обе модели обучены:
+if regression_type == "Линейная регрессия":
+    
+    model = LinReg(learning_rate=0.01, epochs=1000, feature_names=X_train.columns.tolist())
     model.fit(X_train.values, y_train.values)
 
     # Обучаем модель из sklearn
@@ -117,6 +122,8 @@ if regression_type == "Линейная регрессия":
 
     st.write("Среднеквадратичная ошибка (MSE) вашей линейной регрессии:", mse_custom)
     st.write("Среднеквадратичная ошибка (MSE) линейной регрессии из sklearn:", mse_sklearn)
+
+
 
 # Логистическая регрессия
 elif regression_type == "Логистическая регрессия":
@@ -158,6 +165,7 @@ elif regression_type == "Логистическая регрессия":
             st.pyplot(fig)
 
         def display_w(self, coef, intercept, title):
+            # нужно вывести названия столбцов
             coef_dict = {self.feature_names[i]: coef[i] for i in range(len(coef))}
             st.write(f'{title}: {coef_dict}, Интерсепт: {intercept}')
 
@@ -183,6 +191,33 @@ elif regression_type == "Логистическая регрессия":
         def derivative_w2(self, X, y):
             predictions = self.predict_proba(X)
             return -X[:, 1] * (y - predictions) 
-
+        
+if regression_type == "Логистическая регрессия":
     # Обучаем вашу модель
-    log_reg = Log
+    log_reg = LogReg(learning_rate=0.01, epochs=1000, feature_names=X_train.columns.tolist())
+    log_reg.fit(X_train.values, y_train.values)
+
+    # Обучаем модель из sklearn
+    sklearn_model = SklearnLogReg()
+    sklearn_model.fit(X_train, y_train)
+
+    # Предсказания
+    y_pred_custom = log_reg.predict(X_test.values)
+    y_pred_sklearn = sklearn_model.predict(X_test)
+
+    # Оценка точности
+    accuracy_custom = accuracy_score(y_test, y_pred_custom)
+    accuracy_sklearn = accuracy_score(y_test, y_pred_sklearn)
+
+    st.write("Точность вашей логистической регрессии:", accuracy_custom)
+    st.write("Точность логистической регрессии из sklearn:", accuracy_sklearn)
+        
+
+# Инициализация и обучение модели
+if regression_type == "Линейная регрессия":
+    model = LinReg(learning_rate, epochs, X_train.columns)
+    model.fit(X_train, y_train)
+
+elif regression_type == "Логистическая регрессия":
+    model = LogReg(learning_rate, epochs, X_train.columns)
+    model.fit(X_train, y_train)
